@@ -83,6 +83,10 @@ std::string getSourceIdConstraint(const EncodableMap& mediaConstraints) {
   return "";
 }
 
+void FlutterMediaStream::RegisterExternalStream(const std::string& stream_id, rtc::scoped_refptrwebrtc::MediaStreamInterface stream) {
+base_->local_streams_[stream_id] = stream;
+}
+
 std::string getDeviceIdConstraint(const EncodableMap& mediaConstraints) {
   auto it = mediaConstraints.find(EncodableValue("deviceId"));
   if (it != mediaConstraints.end() && TypeIs<std::string>(it->second)) {

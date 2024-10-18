@@ -10,6 +10,8 @@ class FlutterMediaStream {
  public:
   FlutterMediaStream(FlutterWebRTCBase* base);
 
+  void RegisterExternalStream(const std::string& stream_id, rtc::scoped_refptr<webrtc::MediaStreamInterface> stream);
+
   void GetUserMedia(const EncodableMap& constraints,
                     std::unique_ptr<MethodResultProxy> result);
 

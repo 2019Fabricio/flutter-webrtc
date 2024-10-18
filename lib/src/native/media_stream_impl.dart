@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:project_01/webrtc_native_bridge.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import 'factory_impl.dart';
@@ -13,6 +14,20 @@ class MediaStreamNative extends MediaStream {
     return MediaStreamNative(map['streamId'], map['ownerTag'])
       ..setMediaTracks(map['audioTracks'], map['videoTracks']);
   }
+
+    static Future<MediaStreamNative?> createFromCustomSource(String moduleType) async {
+  final String? streamId = await WebRTCNativeBridge.createAndRegisterCustomStream(moduleType);
+
+  if (streamId != null) {
+    final stream = MediaStreamNative(streamId, 'custom');
+    await stream.getMediaTracks(); // Fetch the tracks for this stream
+    return stream;
+  }
+
+  return null;
+}
+
+bool get isCustomStream => ownerTag == 'custom';
 
   final _audioTracks = <MediaStreamTrack>[];
   final _videoTracks = <MediaStreamTrack>[];
@@ -38,14 +53,22 @@ class MediaStreamNative extends MediaStream {
   }
 
   @override
-  Future<void> getMediaTracks() async {
-    final response = await WebRTC.invokeMethod(
-      'mediaStreamGetTracks',
-      <String, dynamic>{'streamId': id},
-    );
+Future getMediaTracks() async {
+final response = await WebRTC.invokeMethod(
+'mediaStreamGetTracks',
+<String, dynamic>{'streamId': id},
+);
 
-    setMediaTracks(response['audioTracks'], response['videoTracks']);
-  }
+if (response != null) {
+setMediaTracks(
+response['audioTracks'] ?? [],
+response['videoTracks'] ?? [],
+);
+} else {
+// Handle the case where we couldn't get track information
+print('Failed to get media tracks for stream $id');
+}
+}
 
   @override
   Future<void> addTrack(MediaStreamTrack track,
